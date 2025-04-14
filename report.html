@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ziroh Labs Kompact AI グラフィックレコーディング</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kaisei+Decol&family=Yomogi&family=Zen+Kurenaido&display=swap');
+    
+    :root {
+      --color-1: #593C47;
+      --color-2: #F2E63D;
+      --color-3: #F2C53D;
+      --color-4: #F25C05;
+      --color-5: #F24405;
+      --text-main: #334155;
+      --text-heading: #1e40af;
+      --text-subheading: #475569;
+      --bg-light: #fcfcfc;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Zen Kurenaido', sans-serif;
+      background-color: #f8f8f8;
+      background-image: 
+        radial-gradient(rgba(220, 220, 220, 0.2) 1px, transparent 1px),
+        radial-gradient(rgba(220, 220, 220, 0.2) 1px, transparent 1px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+      line-height: 1.3;
+    }
+    
+    .container {
+      width: 1200px;
+      height: 1600px;
+      margin: 0 auto;
+      background-color: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.95);
+      border-bottom: 3px solid var(--color-3);
+      position: relative;
+    }
+    
+    .header::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 100%;
+      height: 10px;
+      background: linear-gradient(45deg, var(--color-3), var(--color-4), var(--color-3));
+      clip-path: polygon(0% 0%, 2% 100%, 4% 0%, 6% 100%, 8% 0%, 10% 100%, 12% 0%, 14% 100%, 16% 0%, 18% 100%, 20% 0%, 22% 100%, 24% 0%, 26% 100%, 28% 0%, 30% 100%, 32% 0%, 34% 100%, 36% 0%, 38% 100%, 40% 0%, 42% 100%, 44% 0%, 46% 100%, 48% 0%, 50% 100%, 52% 0%, 54% 100%, 56% 0%, 58% 100%, 60% 0%, 62% 100%, 64% 0%, 66% 100%, 68% 0%, 70% 100%, 72% 0%, 74% 100%, 76% 0%, 78% 100%, 80% 0%, 82% 100%, 84% 0%, 86% 100%, 88% 0%, 90% 100%, 92% 0%, 94% 100%, 96% 0%, 98% 100%, 100% 0%);
+    }
+    
+    .title-container {
+      max-width: 70%;
+    }
+    
+    .title {
+      font-family: 'Kaisei Decol', serif;
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      line-height: 1.2;
+      color: var(--color-1);
+      text-shadow: 2px 2px 0 rgba(242, 198, 61, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .title::after {
+      content: "";
+      position: absolute;
+      left: -5px;
+      bottom: 0;
+      width: 60%;
+      height: 15px;
+      background-color: rgba(242, 196, 61, 0.3);
+      z-index: -1;
+      transform: skew(-3deg, -1deg);
+    }
+    
+    .subtitle {
+      font-size: 16px;
+      color: var(--text-subheading);
+      margin-bottom: 5px;
+      font-weight: normal;
+    }
+    
+    .date-source {
+      text-align: right;
+      font-size: 14px;
+      color: var(--text-subheading);
+    }
+    
+    .content {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, auto);
+      gap: 15px;
+      padding: 20px;
+      height: calc(100% - 100px - 50px); /* subtract header and footer height */
+    }
+    
+    .section {
+      background-color: var(--bg-light);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--color-3), var(--color-4));
+      border-radius: 3px 3px 0 0;
+    }
+    
+    .section-large {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      gap: 8px;
+    }
+    
+    .section-title {
+      font-family: 'Yomogi', cursive;
+      font-size: 18px;
+      color: var(--color-1);
+      font-weight: bold;
+      position: relative;
+      display: inline-block;
+      z-index: 1;
+    }
+    
+    .section-title::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background-color: rgba(242, 198, 61, 0.4);
+      z-index: -1;
+      border-radius: 4px;
+    }
+    
+    .section-icon {
+      font-size: 20px;
+      color: var(--color-5);
+    }
+    
+    .section-content {
+      font-size: 14px;
+      color: var(--text-main);
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    
+    .handdrawn-box {
+      border: 3px solid var(--color-1);
+      border-radius: 15px;
+      padding: 15px;
+      margin: 10px 0;
+      position: relative;
+      background-color: white;
+    }
+    
+    .handdrawn-box::before {
+      content: "";
+      position: absolute;
+      top: -8px;
+      left: 20px;
+      width: 30%;
+      height: 5px;
+      background-color: white;
+    }
+    
+    .key-point {
+      font-weight: bold;
+      color: var(--color-1);
+      position: relative;
+      display: inline-block;
+      z-index: 1;
+    }
+    
+    .key-point::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background-color: rgba(242, 198, 61, 0.4);
+      z-index: -1;
+      border-radius: 3px;
+    }
+    
+    .highlight {
+      background: linear-gradient(transparent 40%, rgba(242, 198, 61, 0.4) 40%);
+      padding: 0 3px;
+    }
+    
+    .arrow {
+      width: 40px;
+      height: 20px;
+      margin: 10px auto;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .arrow::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--color-4);
+      clip-path: polygon(0 40%, 70% 40%, 70% 0, 100% 50%, 70% 100%, 70% 60%, 0 60%);
+    }
+    
+    .handdrawn-arrow {
+      position: absolute;
+      width: 80px;
+      height: 40px;
+      z-index: 2;
+    }
+    
+    .handdrawn-arrow.right {
+      transform: rotate(0deg);
+      right: -60px;
+      top: 50%;
+    }
+    
+    .handdrawn-arrow.left {
+      transform: rotate(180deg);
+      left: -60px;
+      top: 50%;
+    }
+    
+    .handdrawn-arrow.down {
+      transform: rotate(90deg);
+      bottom: -60px;
+      left: 50%;
+    }
+    
+    .handdrawn-arrow.up {
+      transform: rotate(-90deg);
+      top: -60px;
+      left: 50%;
+    }
+    
+    .handdrawn-arrow svg path {
+      stroke: var(--color-4);
+      stroke-width: 4;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    
+    .list-item {
+      position: relative;
+      padding-left: 25px;
+      margin-bottom: 10px;
+    }
+    
+    .list-item::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--color-4);
+      font-weight: bold;
+    }
+    
+    .tag {
+      display: inline-block;
+      background-color: var(--color-3);
+      color: var(--color-1);
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 12px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .diagram {
+      margin: 15px 0;
+      position: relative;
+    }
+    
+    .icon-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .icon {
+      min-width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--color-1);
+    }
+    
+    .badge {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background-color: var(--color-4);
+      color: white;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transform: rotate(10deg);
+    }
+    
+    .footer {
+      height: 50px;
+      padding: 15px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-subheading);
+      border-top: 1px dashed var(--color-3);
+    }
+    
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-family: 'Zen Kurenaido', sans-serif;
+    }
+    
+    .comparison-table th, .comparison-table td {
+      border: 2px solid var(--color-3);
+      padding: 8px;
+      text-align: center;
+      font-size: 12px;
+    }
+    
+    .comparison-table th {
+      background-color: rgba(242, 198, 61, 0.2);
+      font-weight: bold;
+      color: var(--color-1);
+    }
+    
+    .comparison-table tr:nth-child(even) {
+      background-color: rgba(242, 230, 61, 0.1);
+    }
+    
+    .swot-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .swot-box {
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+    
+    .swot-box h4 {
+      margin-bottom: 5px;
+      font-size: 14px;
+      text-align: center;
+    }
+    
+    .swot-box.strengths {
+      background-color: rgba(242, 198, 61, 0.2);
+      border: 2px dashed var(--color-3);
+    }
+    
+    .swot-box.weaknesses {
+      background-color: rgba(242, 92, 5, 0.1);
+      border: 2px dashed var(--color-4);
+    }
+    
+    .swot-box.opportunities {
+      background-color: rgba(89, 60, 71, 0.1);
+      border: 2px dashed var(--color-1);
+    }
+    
+    .swot-box.threats {
+      background-color: rgba(242, 68, 5, 0.1);
+      border: 2px dashed var(--color-5);
+    }
+    
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .scrollable-content {
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    
+    /* スクロールバーのスタイリング */
+    .scrollable-content::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .scrollable-content::-webkit-scrollbar-track {
+      background: rgba(242, 230, 61, 0.1);
+      border-radius: 10px;
+    }
+    
+    .scrollable-content::-webkit-scrollbar-thumb {
+      background: var(--color-3);
+      border-radius: 10px;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid var(--color-4);
+    }
+    
+    .quote {
+      font-style: italic;
+      position: relative;
+      padding: 10px 20px;
+      margin: 10px 0;
+      background-color: rgba(242, 230, 61, 0.1);
+      border-radius: 8px;
+    }
+    
+    .quote::before {
+      content: "";
+      font-size: 40px;
+      position: absolute;
+      left: 5px;
+      top: -10px;
+      color: var(--color-3);
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title-container">
+        <h1 class="title">Ziroh Labs開発「先端半導体不要なAI実行システム」</h1>
+        <p class="subtitle">Kompact AI: AIアクセシビリティの再構築を目指す革新技術</p>
+      </div>
+      <div class="date-source">
+        <p>分析レポート | 2025年4月</p>
+        <p>情報整理: Claude</p>
+      </div>
+    </div>
+    
+    <div class="content">
+      <!-- セクションA: エグゼクティブサマリー -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">📝</div>
+          <h2 class="section-title">エグゼクティブサマリー</h2>
+        </div>
+        <div class="section-content">
+          <div class="handdrawn-box">
+            <span class="key-point">Kompact AIとは？</span>
+            <p>IIT Madrasとの協力で開発された革新的なAI実行システム。<span class="highlight">高価なGPUを必要とせず</span>、標準的なCPU上で大規模AIモデルを実行可能にする。</p>
+          </div>
+          
+          <div class="icon-box">
+            <div class="icon">💡</div>
+            <div>
+              <span class="key-point">主要な価値提案</span>
+              <p>ハードウェアコストとアクセシビリティの障壁を大幅に低減し、AI導入の<span class="highlight">民主化</span>を促進</p>
+            </div>
+          </div>
+          
+          <div class="icon-box">
+            <div class="icon">🔬</div>
+            <div>
+              <span class="key-point">技術概要</span>
+              <p>標準的なIntel Xeonプロセッサを搭載したデバイス上で、MetaのLlama 2やAlibabaのQwen 2.5などのモデルを実行</p>
+            </div>
+          </div>
+          
+          <div class="icon-box">
+            <div class="icon">📊</div>
+            <div>
+              <span class="key-point">現状</span>
+              <p>2025年4月頃に発表、デモンストレーション実施。IIT Madrasと共にベンチマーク評価を実施中。専門研究センター（COAIR）も設立。</p>
+            </div>
+          </div>
+          
+          <div class="icon-box">
+            <div class="icon">🌍</div>
+            <div>
+              <span class="key-point">市場への意義</span>
+              <p>AI推論ハードウェア市場に挑戦。GPU依存を低減し、AI技術の普及を促進。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- セクションB: 導入 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">🔍</div>
+          <h2 class="section-title">導入：AIハードウェアの課題</h2>
+        </div>
+        <div class="section-content">
+          <div class="handdrawn-box">
+            <span class="key-point">GPUボトルネックの現実</span>
+            <p>現代のAI、特に大規模言語モデル（LLM）の開発・運用は<span class="highlight">高性能GPU</span>に大きく依存している</p>
+          </div>
+          
+          <div class="list-item">
+            <span class="key-point">コスト問題</span>: 最先端GPUの取得コストは非常に高く、多くの組織にとって大きな負担
+          </div>
+          
+          <div class="list-item">
+            <span class="key-point">アクセシビリティと供給不足</span>: 高性能GPUの需要は供給を上回り、「AIデバイド」を生み出している
+          </div>
+          
+          <div class="list-item">
+            <span class="key-point">消費電力問題</span>: NvidiaのA100は400W、H100は700W、B100は1000Wもの電力を要する
+          </div>
+          
+          <div class="list-item">
+            <span class="key-point">ベンダーロックイン</span>: 特定のサプライヤー（特にNvidia）への依存に対する懸念
+          </div>
+          
+          <div class="diagram">
+            <table class="comparison-table">
+              <tr>
+                <th>項目</th>
+                <th>詳細</th>
+              </tr>
+              <tr>
+                <td>企業名</td>
+                <td>Ziroh Labs Inc.</td>
+              </tr>
+              <tr>
+                <td>設立年</td>
+                <td>2016年</td>
+              </tr>
+              <tr>
+                <td>主要拠点</td>
+                <td>インド(研究開発)・米国(本社)</td>
+              </tr>
+              <tr>
+                <td>主要人物</td>
+                <td>Hrishikesh Dewan (CEO)</td>
+              </tr>
+              <tr>
+                <td>当初の焦点</td>
+                <td>プライバシー保護暗号技術</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- セクションC: Kompact AIシステム -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">⚙️</div>
+          <h2 class="section-title">Kompact AIシステム：技術概要</h2>
+        </div>
+        <div class="section-content">
+          <div class="handdrawn-box">
+            <span class="key-point">中核となる技術コンセプト</span>
+            <p>大規模AIモデルの<span class="highlight">推論段階</span>を標準的なCPU（Intel Xeonなど）上で効率的に実行</p>
+          </div>
+          
+          <div class="badge">NEW</div>
+          
+          <div class="icon-box">
+            <div class="icon">💰</div>
+            <div>
+              <span class="key-point">費用対効果</span>
+              <p>特殊で高価なGPUの代わりに、ユビキタスで安価なCPUを活用することによるハードウェアコストの削減</p>
+            </div>
+          </div>
+          
+          <div class="icon-box">
+            <div class="icon">🔓</div>
+            <div>
+              <span class="key-point">アクセシビリティ</span>
+              <p>高度なGPUの取得が困難な組織や地域にとって、AI機能へのアクセスを向上</p>
+            </div>
+          </div>
+          
+          <div class="icon-box">
+            <div class="icon">🔄</div>
+            <div>
+              <span class="key-point">ハードウェア非依存性</span>
+              <p>様々な標準CPU（IntelおよびAMD製CPUを含む）との互換性</p>
+            </div>
+          </div>
+          
+          <div class="icon-box">
+            <div class="icon">⚡</div>
+            <div>
+              <span class="key-point">潜在的な電力効率</span>
+              <p>標準CPUはハイエンドGPUと比較して消費電力が低い可能性</p>
+            </div>
+          </div>
+          
+          <div class="handdrawn-box">
+            <span class="key-point">実証されたモデル</span>
+            <div class="tag">Llama 2</div>
+            <div class="tag">Qwen 2.5</div>
+            <div class="tag">DeepSeek</div>
+            <p>合計で17のAIモデルを最適化したと主張</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- セクションD: 残りの内容を統合 -->
+      <div class="section section-large">
+        <div class="section-header">
+          <div class="section-icon">📊</div>
+          <h2 class="section-title">市場影響・応用分野・分析</h2>
+        </div>
+        <div class="section-content scrollable-content">
+          <div class="two-column">
+            <!-- 左カラム -->
+            <div>
+              <h3 style="font-family: 'Yomogi', cursive; color: var(--color-4); margin-bottom: 10px;">🚀 現状：開発と検証</h3>
+              
+              <div class="card">
+                <span class="key-point">IIT Madrasとの協力</span>
+                <p>Centre of AI Research (COAIR) を設立し、CPUベースの効率的なAIソリューション開発を目指す</p>
+              </div>
+              
+              <div class="card">
+                <span class="key-point">検証状況</span>
+                <p>IIT Madrasと共に初期のベンチマーク評価を実施。IntelおよびAMDによる検証も報告されている</p>
+              </div>
+              
+              <div class="arrow"></div>
+              
+              <h3 style="font-family: 'Yomogi', cursive; color: var(--color-4); margin-bottom: 10px;">🎯 ターゲット応用分野</h3>
+              
+              <div class="list-item">
+                <span class="key-point">エッジコンピューティング</span>: 電力・コスト・接続性の制限からクラウドGPUへの依存が現実的でない環境
+              </div>
+              
+              <div class="list-item">
+                <span class="key-point">IoT</span>: デバイスやゲートウェイ上で直接、より高度なAIを実行
+              </div>
+              
+              <div class="list-item">
+                <span class="key-point">オンプレミス企業AI</span>: 既存CPU上でAI推論を実行し、コスト削減とデータプライバシー向上
+              </div>
+              
+              <div class="list-item">
+                <span class="key-point">リソース制約環境</span>: 開発途上国や特定セクター（農業、ヘルスケア、教育など）
+              </div>
+              
+              <h3 style="font-family: 'Yomogi', cursive; color: var(--color-4); margin-bottom: 10px;">🌟 業界の見解</h3>
+              
+              <div class="quote">
+                <p>「自然に触発されたアプローチで、AIデバイドへの対応、手頃な価格のマシンでの正確な推論を実現」</p>
+                <p style="text-align: right; font-size: 12px;">- IIT Madras所長 V. Kamakoti教授</p>
+              </div>
+              
+              <div class="quote">
+                <p>「重厚なインフラコストなしにAIの可能性を解き放つゲームチェンジャー」</p>
+                <p style="text-align: right; font-size: 12px;">- IITM Pravartak Foundation Madhusudhanan B博士</p>
+              </div>
+            </div>
+            
+            <!-- 右カラム -->
+            <div>
+              <h3 style="font-family: 'Yomogi', cursive; color: var(--color-4); margin-bottom: 10px;">💥 市場への影響</h3>
+              
+              <div class="card">
+                <span class="key-point">AIハードウェアパラダイムへの挑戦</span>
+                <p>推論タスクにおけるGPU（特にNvidia製）の必要性に対する直接的な挑戦。ハイエンドAI推論チップへの需要減少の可能性</p>
+              </div>
+              
+              <div class="card">
+                <span class="key-point">AIの民主化</span>
+                <p>より多くの組織（中小企業、スタートアップ、学術機関）や開発者、特にインドのような新興経済国におけるAI導入の促進</p>
+              </div>
+              
+              <div class="card">
+                <span class="key-point">地域への影響</span>
+                <p>インドの国家戦略「AI for All」や技術的自立（Atmanirbhar Bharat）の推進に貢献</p>
+              </div>
+              
+              <h3 style="font-family: 'Yomogi', cursive; color: var(--color-4); margin-bottom: 10px;">⚔️ 競合環境</h3>
+              
+              <div class="comparison-table" style="font-size: 10px;">
+                <tr>
+                  <th>項目</th>
+                  <th>Kompact AI</th>
+                  <th>ハイエンドGPU</th>
+                  <th>ASIC/TPU</th>
+                </tr>
+                <tr>
+                  <td>ハードウェア</td>
+                  <td>CPU</td>
+                  <td>GPU</td>
+                  <td>特化型チップ</td>
+                </tr>
+                <tr>
+                  <td>コスト</td>
+                  <td>低</td>
+                  <td>非常に高い</td>
+                  <td>高い</td>
+                </tr>
+                <tr>
+                  <td>性能</td>
+                  <td>不明/低い？</td>
+                  <td>非常に高い</td>
+                  <td>高い（特定タスク）</td>
+                </tr>
+                <tr>
+                  <td>消費電力</td>
+                  <td>低〜中？</td>
+                  <td>非常に高い</td>
+                  <td>中〜高</td>
+                </tr>
+              </table>
+              
+              <div class="swot-grid">
+                <div class="swot-box strengths">
+                  <h4>強み (Strengths)</h4>
+                  <p>・既存CPUインフラ活用</p>
+                  <p>・大幅なコスト削減</p>
+                  <p>・アクセシビリティ向上</p>
+                  <p>・強力な学術パートナー</p>
+                </div>
+                
+                <div class="swot-box weaknesses">
+                  <h4>弱み (Weaknesses)</h4>
+                  <p>・技術詳細が非公開</p>
+                  <p>・ベンチマーク非公開</p>
+                  <p>・性能限界の可能性</p>
+                  <p>・資金調達額が少ない</p>
+                </div>
+                
+                <div class="swot-box opportunities">
+                  <h4>機会 (Opportunities)</h4>
+                  <p>・巨大な推論市場</p>
+                  <p>・エッジAI/IoT成長</p>
+                  <p>・CPUベンダーとの提携</p>
+                  <p>・技術ライセンス供与</p>
+                </div>
+                
+                <div class="swot-box threats">
+                  <h4>脅威 (Threats)</h4>
+                  <p>・既存ベンダーとの競争</p>
+                  <p>・アプローチの模倣可能性</p>
+                  <p>・スケーラビリティ課題</p>
+                  <p>・精度/性能トレードオフ</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-top: 20px;">
+            <h3 style="font-family: 'Yomogi', cursive; color: var(--color-4); margin-bottom: 10px;">📋 結論と戦略的推奨事項</h3>
+            
+            <div class="handdrawn-box">
+              <span class="key-point">潜在的企業/顧客向け</span>
+              <p>概念実証（PoC）を実施し、透明性のあるパフォーマンスデータの提供を要求。TCO（総所有コスト）のメリットを慎重に評価</p>
+            </div>
+            
+            <div class="handdrawn-box">
+              <span class="key-point">競合他社向け</span>
+              <p>Kompact AIの進捗を注意深く監視。CPU最適化と低コスト/低消費電力推論ソリューションの開発を加速</p>
+            </div>
+            
+            <div class="handdrawn-box">
+              <span class="key-point">Ziroh Labs向け</span>
+              <p>透明性のある独立したパフォーマンスベンチマーキングを優先。基盤技術の明確な説明と商用化ロードマップの提示</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>出典: Ziroh Labs開発「先端半導体不要なAI実行システム」に関する分析レポート | グラフィックレコーディング作成: Claude (2025年4月)</p>
+    </div>
+  </div>
+</body>
+</html>
