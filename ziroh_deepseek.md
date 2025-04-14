@@ -1,5 +1,5 @@
 ---
-marp: true
+marp: false
 theme: gaia # シンプルなテーマを選択
 size: 16:9
 paginate: true
