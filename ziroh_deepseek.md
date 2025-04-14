@@ -1,29 +1,34 @@
 ---
-marp: false
+marp: true
 theme: gaia # シンプルなテーマを選択
 size: 16:9
 paginate: true
 header: 'Ziroh Labs & kompact AI 分析レポート'
-footer: 'Gemini分析 | 2025年4月14日'
 style: |
   section {
-    font-size: 26px; /* スライド全体の文字サイズを調整 */
+    font-size: 20px; /* スライド全体の文字サイズを調整 */
     line-height: 1.6;
   }
   h1, h2 {
-    color: #1e40af; /* 見出しの色 */
+    font-family: "メイリオ", "Meiryo", sans-serif;
+    color: #1e40af;
   }
   strong {
-    color: #F25C05; /* 強調色 */
+    color: #F25C05;
     font-weight: bold;
   }
   table {
-    font-size: 20px; /* 表の文字サイズ調整 */
+    font-size: 20px;
   }
   th, td {
     padding: 8px 12px;
   }
-
+  body {
+    font-family: "メイリオ", "Meiryo", sans-serif;
+  }
+  h3, p, li {
+    font-family: "メイリオ", "Meiryo", sans-serif;
+  }
 ---
 
 # Ziroh Labs & kompact AI：DeepSeekショック再来の可能性 分析レポート
